@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+           
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+<html>
+  <head>
+    <title>
+      JavaScript for .Net-Utviklere
+    </title>
+    <meta charset='utf-8'>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript">
+</script>
+    <script src="http://html5slides.googlecode.com/svn/trunk/slides.js" type="text/javascript">
+</script>
+    <script src="/socket.io/socket.io.js" type="text/javascript">
+</script>
+    <script src="/js/pres.js" type="text/javascript">
+</script>
+    <link href="css/webstep.css" media="screen" rel="stylesheet" type="text/css">
+  </head>
+  <body style='display: none'>
+    <section class='slides layout-regular template-webstep'>
+      <article>
+        <h1>
+          JavaScript for<br>
+          ikke-JavaScriptere
+        </h1>
+
+        <p>
+          Torstein Bjørnstad<br>
+          8. september 2011
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Hvorfor bruke JavaScript
+        </h3>
+
+        <ul class="build">
+          <li>Det eneste alternativet
+          </li>
+
+          <li>JavaScript er et godt språk!
+          </li>
+
+          <li>Funksjonell programmering er kult :)
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h2>
+          Objekter og Prototyper
+        </h2>
+      </article>
+
+      <article>
+        <h3>
+          Object Literals
+        </h3>
+
+        <p>
+          Bruk <code>{}</code> for å lage objekter.
+        </p>
+
+        <pre>
+var tomtObjekt = {};
+
+var person = {
+    fornavn: "Torstein",
+    firma: "Webstep"
+};
+
+person.fornavn                               // "Torstein"
+
+person.adresse                               // undefined
+person.adresse.privat                        // throw "TypeError"
+person.adresse &amp;&amp; person.adresse.privat      // undefined
+
+</pre>
+      </article>
+
+      <article>
+        <h3>
+          Arrays er også objekter
+        </h3>
+
+        <p>
+          Opprett en array med <code>[]</code>
+        </p>
+
+        <pre>
+var frukt = ["Banan", "Eple", "Appelsin"];
+
+frukt.length                                  // 3
+
+frukt.push("drue");
+frukt.length                                  // 4        
+</pre>
+      </article>
+
+      <article>
+        <p>
+          Strenger..<code>*</code>
+        </p>
+
+        <pre>
+var tekst = "Jeg er et objekt";
+tekst.length                //16
+
+"Jeg er et objekt".length   // 16      
+</pre>
+        <p class="source">
+          *En sannhet med modifikasjoner, men de fungerer som objekter
+        </p>
+      </article>
+
+      <article>
+        <p>
+          .. og funksjoner!
+        </p>
+
+        <pre>
+var hallo = function (){
+  return "Hallo!";
+}
+hallo();                  // "Hallo!"
+
+hallo.hei = "Hei!";
+hallo.hei                 // "Hei!"
+hallo()                   // "Hallo!"
+</pre>
+      </article>
+
+      <article>
+        <h3>
+          Alt er objekter
+        </h3>
+        <ul>
+          <li>Alle primitiver og objekter i JavaScript er objekter.
+          </li>
+
+          <li>Det finnes ikke noe konsept om "klasser"
+          </li>
+        </ul>
+
+        <div class="build">
+          <p>
+            </br>
+            </br>
+            Så hvor er de definert?
+          </p>
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          Prototyper
+        </h3>
+
+        <p>
+          Alle objekter har en <i>prototype</i>-property som angir et <b>objekt</b> de arver properties og metoder fra.
+        </p>
+
+        <ul>
+          <li>Object literals ({}) har <code>Object.prototype</code>
+          </li>
+
+          <li>Arrays har <code>Array.prototype</code>
+          </li>
+
+          <li>Strenger har <code>String.prototype</code>
+          </li>
+        </ul>
+
+        <p>
+          <code>Array.prototype</code> og <code>String.prototype</code> har igjen Object.prototype som prototyp
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Kjent modell
+        </h3>
+
+        <p>
+          <img src="images/classinheritance.png" style="height: 500px">
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          I JavaScript
+        </h3>
+
+        <p>
+          <img src="images/objectinheritance.png" style="height: 500px">
+        </p>
+      </article>
+
+      <article>
+        <p>
+          Ettersom objektene er bygd opp av andre objekter, og ikke maler (klasser), resolves alt av properties runtime.
+        </p>
+
+        <p>
+          Dette gir oss muligheten for dynamisk arv, vha delegering.
+        </p>
+
+<div class="build">
+        <pre>
+var person2 = Object.create(person);
+person2.fornavn = "Jan Ove";
+</pre>
+
+        <pre>
+person.fornavn                               // "Torstein"
+person2.fornavn                              // "Jan Ove"
+person2.firma                                // "Webstep"    
+</pre>
+
+        <pre>
+person.yrke = "Konsulent";
+person2.yrke                                 // "Konsulent"
+person2.adresse                              // undefined
+</pre>
+</div>
+      </article>
+
+      <article>
+        <p>
+          Også på innebygde typer
+        </p>
+
+        <pre>
+String.prototype.reverse = function(){
+  var i = this.length, r = "";
+  while(i--) { r += this[i]; };
+  return r;
+};
+
+"JavaScript".reverse()                           // tpircSavaj
+</pre>
+        <p>
+          Objekter sjekker først på seg selv, så på sin prototyp, så på dens prototyp, hele veien til Object.prototype.
+        </p>
+      </article>
+
+      <article>
+        <h2>
+          Scope og struktur
+        </h2>
+      </article>
+
+      <article>
+        <h3>
+          Globalt Scope
+        </h3>
+
+        <p>
+          JavaScript har ikke globalt scope
+        </p>
+
+        <p>
+          Det globale scope blir gitt av runtimemiljøet, som regel browseren, og er et nytt objekt; <code>window</code>
+        </p>
+
+        <pre>
+&lt;script&gt;
+var globalVar = "min global";
+
+globalVar                      // "min global"
+window.globalVar               // "min global"
+window['globalVar']            // "min global"
+&lt;/script&gt;
+</pre>
+      </article>
+
+      <article>
+        <h3>
+          Pass på
+        </h3>
+
+        <p>
+          Variabler blir globale når
+        </p>
+
+        <ul class="build">
+          <li>De eksplisitt settes på det globale objektet
+          </li>
+
+          <li>Defineres utenfor en funksjon (typisk i en script-tag)
+          </li>
+
+          <li>Lages inni en funksjon, uten bruk av <code>var</code>
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          this
+        </h3>
+
+        <p>
+          <code>this</code> redefineres ut ifra hvor den brukes.<br>
+          Tenk over hvilken kontekst du er i, eller kommer til å være i.
+        </p>
+
+        <ul class="build">
+          <li>Utenfor en funksjon: this = det globale objektet
+          </li>
+
+          <li>Inni en funksjon: this = det globale objektet
+          </li>
+
+          <li>Inni et objekt: this = objektet selv
+          </li>
+
+          <li>Inni en metode på et objekt: this = objektet selv
+          </li>
+
+          <li>Inni en konstruktor: this = den nye instansen
+          </li>
+
+          <li>Inni en metode til en konstruktor: this = den nye instansen
+          </li>
+        </ul>
+      </article>
+
+      <article>
+
+          <iframe src="http://jsfiddle.net/ToshB/bSLuR/embedded/js,result/presentation/" style="height: 250px"></iframe>
+        <div class="build">
+          <pre>
+var funk = eple.visFarge;
+funk()                                        // ?
+</pre>
+
+          <pre>
+setTimeout(eple.visFarge, 500);               // ?
+</pre>
+        </div>
+      </article>
+
+      <article>
+
+          <iframe src="http://jsfiddle.net/ToshB/k5AYR/embedded/js,result/presentation/" style="height: 370px"></iframe>
+        <div class="build">
+          <div></br>
+            <p>
+          Alternativt, sett <code>this</code> med <code>.call()</code>:
+          </p>
+          <pre>
+var funk = eple.visFarge();
+funk.call(eple);
+</pre>
+          <div>
+        </div>
+      </article>
+
+      <article>
+        <h2>
+          Funksjoner
+        </h2>
+      </article>
+
+      <article>
+        <p>Definer en ny funksjon med:</p>
+          <pre>
+function add(a, b){
+  return a + b;
+}
+</pre>
+        <div class="build">
+          <pre>
+function add(){
+  return arguments[0] + arguments[1];
+}
+</pre>
+          <div>
+            <p>
+              Og disse er funksjonelt identiske
+            </p>
+
+            <pre>
+function add(){
+  // stuff
+}
+
+var add = function (){
+  //stuff
+}
+</pre>
+          </div>
+        </div>
+      </article>
+
+      <article>
+
+          <p>
+            Funksjoner som bare skal brukes ett sted kan godt defineres kun der, noe som <i>kan</i> gi mer lesbar kode
+          </p>
+        <div class="build">
+          <pre>
+function doSomething(item) {
+  alert(item);
+}
+
+forEach(arr, doSomething);
+</pre>
+          <div>
+            <p>
+              Kan også skrives som
+            </p>
+
+            <pre>
+forEach(arr, function(item){ alert(item); });
+</pre>
+          </div>
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          Closures
+        </h3>
+
+        <p>
+          Alle som har jobbet med Resharper i VS har nok sett advarselen: 
+          <i>Access to modified closure</i>
+        </p>
+
+        <ul class="build">
+          <li>Funksjoner holder på referansene til refererte objekter
+          </li>
+
+          <li>Et problem når koden ikke eksekveres umiddelbart
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>Eksempel</h3>
+        <pre>
+for (var i = 0; i &lt; 5; i++) {
+    $('box' + i).onclick = function (){
+        alert("Du klikket: " + i);
+    };
+}          
+</pre><iframe src="http://jsfiddle.net/ToshB/GyU5v/embedded/result,js/presentation/" style="height: 180px"></iframe>
+<p>Hva skjer her?</p>
+      </article>
+
+      <article>
+        <p>
+          Løsning
+        </p>
+
+        <pre>
+for (var i = 0; i &lt; 5; i++) {
+    $('box' + i).onclick = function (index){
+        return function (){
+          alert("Du klikket: " + index);
+        };
+    }(i);
+}
+</pre><iframe src="http://jsfiddle.net/ToshB/upSvN/embedded/js,result/presentation/" style="height: 250px"></iframe>
+      </article>
+
+      <article>
+        <h3>
+          Et mer generelt pattern
+        </h3>
+
+        <pre>
+var wrapper = function() {
+  var secret = "secret string";
+  var inaccessible = "inaccessible string";
+  return function(){
+    return secret;
+  } 
+}();
+</pre>
+        <p>
+          Legg merke til <code>()</code> på slutten
+        </p>
+      </article>
+
+      <article>
+        <h3>
+          Chaining / fluent interfaces
+        </h3>
+        <pre style="margin-top:5px;">
+var chain = (function(){
+    var api;
+
+    function start(){
+        document.write('starter..');
+        return api;
+    }
+
+    function stopp(){
+        document.write('stopper');
+    }
+
+    api = {
+        start: start,
+        ogStopp: stopp
+    };
+
+    return api;
+})();
+chain.start().ogStopp();          // starter..stopper
+</pre>
+      </article>
+
+      <article>
+        <h2>
+          Patterns
+        </h2>
+      </article>
+
+      <article>
+        <h3>
+          Konstruktorer
+        </h3>
+
+        <pre>
+function Fruit(type, weight){
+  this.type = type;
+  this.weight = weight;
+  this.biteSize = 100;
+  this.eat = function(){
+    this.weight = this.weight - this.biteSize;
+    return this.weight;
+  }
+}
+</pre>
+
+        <pre>
+var apple = new Fruit('apple', 200);
+apple.type                              // 'apple'
+apple.eat()                             // 100
+</pre>
+      </article>
+
+      <article>
+        <p>
+          Med utnyttelse av arv
+        </p>
+
+        <pre>
+function Fruit(type, weight){
+  this.type = type;
+  this.weight = weight;
+  this.biteSize = 100;
+}
+Fruit.prototype.eat = function(){
+  this.weight = this.weight - this.biteSize;
+  return this.weight;
+}
+</pre>
+        <p>
+          Skaper færre instanser av eat-metoden, og gjør at vi lettere kan endre i ettertid
+        </p>
+      </article>
+
+      <article>
+        <p>
+          Med private property og function
+        </p>
+
+        <pre>
+function Fruit(type, weight){
+  var secret = 'sssh';
+  var doSomething = function (){
+    // do stuff
+  };            
+  
+  this.type = type;
+  this.weight = weight;
+  this.biteSize = 100;
+  this.tellSecret = function (){
+    return "It starts with " + secret[0];
+  };
+}
+
+Fruit.prototype.eat = function(){
+  this.weight = this.weight - this.biteSize;
+  return this.weight;
+}
+</pre>
+      </article>
+
+      <article>
+        <p>
+          Med private property og function i forhold til .Net
+        </p>
+
+        <pre>
+function Fruit(type, weight){
+  var secret = 'sssh';                          // private field
+  var doSomething = function (){                // private function
+    // do stuff
+  };            
+  
+  this.type = type;                             // public props
+  this.weight = weight;
+  this.biteSize = 100;
+  this.tellSecret = function (){                // public method
+    return "It starts with " + secret[0];
+  };
+}
+
+Fruit.prototype.eat = function(){               // class method
+  this.weight = this.weight - this.biteSize;
+  return this.weight;
+}
+</pre>
+      </article>
+
+      <article>
+        <h3>
+          Moduler og Namespace
+        </h3>
+
+        <pre>
+var myNamespace = (function (){
+    // Define private variables
+    var var1, var2;
+
+    // Define functions
+    function doStuff(){
+    }
+
+    function doOtherStuff(){
+        alert('hello');
+    }
+
+    // Define public interface
+    return {
+        do: doStuff
+    };
+})();
+</pre>
+      </article>
+
+      <article>
+        <pre>
+MYAPP = MYAPP || {};
+MYAPP.Module1 = (function (){
+    // internal stuff
+
+    return {
+        // public stuff
+    };
+})();
+</pre>
+
+        <pre>
+MYAPP = MYAPP || {};
+MYAPP.Module2 = (function (){
+    // internal stuff
+
+    return {
+        // public stuff
+    };
+})();
+</pre>
+      </article>
+      <article>
+        <h2>
+          Tips
+        </h2>
+      </article>
+
+      <article>
+        <h3>
+          Generelt
+        </h3>
+
+        <ul class="build">
+          <li>Ikke opprett mange globals, prøv å begrense deg til én
+          </li>
+
+          <li>Ikke endre på system-prototyper, bare fordi du kan
+          </li>
+
+          <li>Ikke grøt sammen markup (HTML) og JavaScript
+          </li>
+
+          <li>evt.. ikke grøt sammen DOM-manipulering og logikk
+          </li>
+
+          <li>Abstraher bort DOM'en med biblioteker
+          </li>
+
+          <li>Lær deg JavaScript før du lærer jQuery
+          </li>
+          <li><b>Les boken <b>JavaScript: The Good Parts</b></b></li>
+        </ul>
+      </article>
+      
+      <article>
+        <h3>Some Bad/Awful Parts
+        </h3>
+
+        <ul class="build">
+          <li>Bruk <code>===</code> og <code>!==</code> istedet for <code>==</code> og <code>!=</code>
+          </li>
+
+          <li>Deklarer alle variabler på toppen av <b>funksjonene</b></br> (JS har ikke blokk scope)
+          </li>
+
+          <li>Bruk semikolon på slutten av hver statement, selv om du ikke må
+          </li>
+
+          <li>Eval is Evil
+          </li>
+          
+          <li>Ikke bruk <code>new String()</code>, <code>new Number()</code> eller <code>new Boolean()</code>. Unngå <code>new Object()</code> og <code>new Array()</code>
+          </li>
+          
+          <li>Uppercase konstruktorer for å unngå feller med <code>new</code>. (Eller ikke bruk <code>new</code>)
+          </li>
+          
+          <li>Unngå bruk av <code>void</code>
+          </li>
+          
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          Script-tagger
+        </h3>
+
+        <ul class="build">
+          <li>Ha lite i dem, typisk vanskelig å teste innholdet
+          </li>
+
+          <li>Ha dem langt ned på siden
+          </li>
+
+          <li>Utsett mest mulig arbeid til document.ready
+          </li>
+
+          <li>Ha få av dem - kombiner/minifiser
+          </li>
+
+          <li>Last fra CDN om mulig
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          Verktøy
+        </h3>
+        <div class="build">
+        <p>
+          Bruk <a href="http://jslint.com/">JSLint</a> eller <a href="http://jshint.com/">JSHint</a>. Begge fås som plugins til Visual Studio, og analyserer JavaScriptfilene ved
+          bygg eller lagring.
+        </p>
+
+        <p>
+          <a href="http://ajaxmin.codeplex.com/">Microsoft Ajax Minifier</a> minifiserer både JavaScript og CSS-filer, og integreres lett i byggeprosessen.<br>
+          Har også en litt nifty støtte for ressursfiler.
+        </p>
+
+        <p>
+          Analyser nettsiden din med <a href="http://code.google.com/speed/page-speed/">Google Page Speed</a> for å finne forbedringspunkter. Innebygd i Chrome.
+        </p>
+
+        <p>
+          Oppgrader til <b>Resharper 6</b>. Kommer med code analysis, navigering, søk, autocomplete. Ikke helt der ennå, men det kommer seg.
+        </p>
+        </div>
+      </article>
+
+      <article>
+        <q>JSLint will hurt your feelings.</q>
+        <div class='author'>
+          Douglas Crockford
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          Videre lesning
+        </h3>
+
+        <ul>
+          <li>
+            <a href='http://www.amazon.com/JavaScript-Good-Parts-Douglas-Crockford/dp/0596517742/'>JavaScript: The Good Parts</a>, Douglas Crockford
+          </li>
+
+          <li>
+            <a href='http://www.amazon.com/JavaScript-Patterns-Stoyan-Stefanov/dp/0596806752/'>JavaScript Patterns</a>, Stoyan Stefanov
+          </li>
+
+          <li>
+            <a href='http://www.amazon.com/Test-Driven-JavaScript-Development-Developers-Library/dp/0321683919/'>Test-Driven JavaScript Development</a>, Christian Johansen
+          </li>
+        </ul>
+      </article>
+    </section>
+  </body>
+</html>
