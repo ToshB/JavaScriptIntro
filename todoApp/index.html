@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Backbone:Todos
+    </title>
+    <link href="css/todos.css" media="all" rel="stylesheet" type="text/css">
+    <script src="js/lib/underscore-min.js"></script>
+    <script src="js/lib/jquery.min.js"></script>
+    <script src="js/lib/backbone-min.js"></script>
+    <script src="js/lib/backbone.localStorage-min.js"></script>
+    <script src="js/models.js" type="text/javascript"></script>
+    <script src="js/views.js" type="text/javascript"></script>
+    <script src="js/router.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="todoapp">
+      <div class="title">
+        <h1>
+          Todos
+        </h1>
+      </div>
+
+      <div class="content regionsx">
+        <div id="todo-form">
+        </div>
+        <div id="todos">
+          <ul id="todo-list">
+            <li>
+            </li>
+          </ul>
+        </div>
+
+        <div id="todo-stats">
+        </div>
+      </div>
+    </div>
+
+    <ul id="instructions">
+      <li>Double-click to edit a todo.
+      </li>
+    </ul>
+    
+    <script>
+      $(function (){
+         TODO.App = new TODO.Router();
+         TODO.tasks.fetch(); 
+         Backbone.history.start();
+      });
+    </script>
+    
+<!-- Templates -->
+
+    <script type="text/html" id="formTemplate">
+      <form>
+    		<input placeholder="What needs to be done?" type="text" />
+    	</form>
+    	</script>
+
+    	<script type="text/template" id="item-template">
+    	  <div class="todo">
+          <div class="display">
+            <input type="checkbox"/>
+            <div class="todo-content"><%= name %></div>
+            <span class="todo-destroy"></span>
+          </div>
+          <div class="edit">
+            <input type="text" value="<%= name %>" />
+          </div>
+        </div>
+    	</script>
+
+      <script type="text/template" id="stats-template">
+      <span class="todo-count">
+        <span class="number"><%= remaining %></span>
+        <span class="word">tasks</span> left.
+      </span>
+      <span class="todo-clear">
+        <a href="#">
+          Clear <span class="number-done"><%= completed %></span>
+          completed <span class="word-done">tasks</span>
+        </a>
+      </span>
+      </script>
+  </body>
+</html>
